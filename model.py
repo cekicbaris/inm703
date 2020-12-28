@@ -5,6 +5,9 @@ import seaborn as sns
 
 
 class Phase():
+    """
+    Phase object to store all data for an experiment phase
+    """
     name:str
     predictors:list
     number_of_trial:int
@@ -14,18 +17,42 @@ class Phase():
 
 
 class Predictor():
-    def __init__(self,name, alpha):
+    def __init__(self,name:str, alpha:float):
+        """
+        Args:
+            name (str): Name of the predictor
+            alpha (float): alpha constant for the predictor
+
+        Returns:
+            Predictor: predictor object
+        """
         self.name = name
         self.alpha = alpha
         self.associative_strength = {}
 
-
 class Group():
-    def __init__(self, name):
+    def __init__(self, name:str):
+        """This is an experiment group class
+        Args:
+            name (str): name of the group
+
+        Returns:
+            Group: [description]
+        """
         self.name = name
         self.phases = []
 
-    def add_phase_for_group(self,phase_name:str, predictors:list, number_of_trial:int,outcome:bool):
+    def add_phase_for_group(self,phase_name:str, predictors:list, number_of_trial:int,outcome:bool)->Phase:
+        """This method is responsible to handle new phases for each group like pre-exposure , conditioning , test
+
+        Args:
+            phase_name (str): Phase name
+            predictors (list): Which predictors will be in this phase
+            number_of_trial (int): How many trial iteration it will generate
+            outcome (bool): Is there any outcome from the test
+        Returns:
+            Phase: returns a phase object
+        """
         phase = Phase()
         phase.name = phase_name
         phase.number_of_trial = number_of_trial
@@ -34,21 +61,49 @@ class Group():
         phase.total_learning = 0
         phase.total_learning_history = []
         self.phases.append(phase)
+        return self.phases
 
 class Model_Rescorla_Wager():
-
-    def __init__(self, lambda_US=1, beta_US=0.05):
+    """
+    Rescorla wagner model for associative learning implementation
+    """
+    def __init__(self, lambda_US:float=1, beta_US:float=0.05):
+        """
+        Args:
+            lambda_US (float, optional): Maximum value for learning in a trail iteration. Defaults to 1.
+            beta_US (float, optional): Constant for a the outcome. Defaults to 0.05.
+        Returns:
+            Model_Rescorla_Wager: [description]
+        """
         self.groups = []
         self.predictor_learning_for_phase = {}
         self.result = pd.DataFrame(columns=['group', 'phase', 'predictor','associative_strength','Predictors by Phase','trial'])
         self.lambda_US = lambda_US
         self.beta_US = beta_US
-    def add_group(self, group:Group):
-        self.groups.append(group)    
+    def add_group(self, group:Group)->list:
+        """Add experiment group to the model
+
+        Args:
+            group (Group): Group object
+
+        Returns:
+            list: [description]
+        """
+        self.groups.append(group)
+        return self.groups    
 
     def model_run(self):
+        """
+        This is the main method to run the RW model. 
+        It loops over group first and for each experiment group it perform learning calculation for each phase. 
+        Later if the stimulus is also presented in the next phase learning is also forwarded. 
+
+        For the stimuli presented togehter, before each of individual learning calculation. Total V is calculated as stated in the R&W algoritm. 
+        Then learning formula is applied. Therefore there will be two loop for predictors for same trail iteration. 
+
+        It collect all the result to a pandas dataframe for visualization. 
+        """
         index = 0
-        
         for group in self.groups:
             phase_index=0
             lambda_US = 0
@@ -81,7 +136,6 @@ class Model_Rescorla_Wager():
 
                         phase.total_learning_history.append(phase.total_learning)
 
-
                     for predictor in phase.predictors:
                         # data reference in the python dictiory with group name + precdictor name + phase index
                         index_key = str(group.name)+'_'+str(predictor.name)+'_'+str(phase_index)
@@ -96,16 +150,21 @@ class Model_Rescorla_Wager():
                             self.result.loc[index] = [group.name, phase.name, predictor.name,predictor.associative_strength[index_key][str(i)],str(group.name) + '-' + str(predictor.name), i ]
                             index += 1
 
-
-                        #print(index_key , phase.total_learning)    
+                        # Rescorla & Wagner Learning formula
                         predictor.associative_strength[index_key][str(i+1)] =  predictor.associative_strength[index_key][str(i)] + predictor.alpha * self.beta_US * (lambda_US -  phase.total_learning )
-                        #print(index_key, predictor.associative_strength[index_key][str(i+1)])
+
+                        # Add result to a pandas dataframe for visualization
                         self.result.loc[index] = [group.name, phase.name, predictor.name,predictor.associative_strength[index_key][str(i+1)],str(group.name) + '-' + str(predictor.name), i+1 ]
                         index += 1
                         
-    def display_results(self):
+    def display_results(self, saveToFile=False):
+        """
+        Display results
+        Each Phase of experiment is shown in a seperate graph
+        Each stimulus is shown on each graph if learning is performed. 
+        """
+        
         pd.set_option('display.max_rows', 100)
-        print(self.result)
         #plt.autoscale(enable=False, axis='both')
         sns.set_style("whitegrid", {'grid.linestyle': '--'})
         fig, axes = plt.subplots(1, len(self.result['phase'].unique()), figsize=(24, 6), sharey=True)
@@ -118,6 +177,9 @@ class Model_Rescorla_Wager():
             axes[i].set_title(phase,weight='bold')
             axes[i].xaxis.set_major_locator(plt.MaxNLocator(11))
             i +=1
+        if saveToFile:
+            self.result.to_csv('model_results.csv')
+            plt.savefig('model_result.png')    
         plt.show()    
 
 
@@ -142,5 +204,5 @@ experiment.add_group(control_group)
 
 # Run the model
 experiment.model_run()
-experiment.display_results()
+experiment.display_results(saveToFile=True)
 
