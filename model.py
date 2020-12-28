@@ -157,7 +157,7 @@ class Model_Rescorla_Wager():
                         self.result.loc[index] = [group.name, phase.name, predictor.name,predictor.associative_strength[index_key][str(i+1)],str(group.name) + '-' + str(predictor.name), i+1 ]
                         index += 1
                         
-    def display_results(self, saveToFile=False):
+    def display_results(self, save_to_file=False):
         """
         Display results
         Each Phase of experiment is shown in a seperate graph
@@ -177,7 +177,7 @@ class Model_Rescorla_Wager():
             axes[i].set_title(phase,weight='bold')
             axes[i].xaxis.set_major_locator(plt.MaxNLocator(11))
             i +=1
-        if saveToFile:
+        if save_to_file:
             self.result.to_csv('model_results.csv')
             plt.savefig('model_result.png')    
         plt.show()    
@@ -204,5 +204,5 @@ experiment.add_group(control_group)
 
 # Run the model
 experiment.model_run()
-experiment.display_results(saveToFile=True)
+experiment.display_results(save_to_file=True)
 
