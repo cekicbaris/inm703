@@ -63,18 +63,19 @@ class Group():
         self.phases.append(phase)
         return self.phases
 
-class Model_Rescorla_Wager():
+class Model_Rescorla_Wagner():
     """
     Rescorla wagner model for associative learning implementation
     """
-    def __init__(self, lambda_US:float=1, beta_US:float=0.05):
+    def __init__(self, experiment_name="", lambda_US:float=1, beta_US:float=0.05):
         """
         Args:
             lambda_US (float, optional): Maximum value for learning in a trail iteration. Defaults to 1.
             beta_US (float, optional): Constant for a the outcome. Defaults to 0.05.
         Returns:
-            Model_Rescorla_Wager: [description]
+            Model_Rescorla_Wagner: [description]
         """
+        self.experiment_name = experiment_name
         self.groups = []
         self.predictor_learning_for_phase = {}
         self.result = pd.DataFrame(columns=['group', 'phase', 'predictor','associative_strength','Predictors by Phase','trial'])
@@ -106,11 +107,13 @@ class Model_Rescorla_Wager():
         index = 0
         for group in self.groups:
             phase_index=0
-            lambda_US = 0
+            
             for phase in group.phases:
                 # if the outcome is presented then the lambda is set otherwise it is 0.
+                lambda_US = 0
                 if phase.outcome: 
                     lambda_US = self.lambda_US
+                    
                 phase_index+=1
                 # check previous phases about the predictor learning
                 for i in range(1,phase.number_of_trial+1):
@@ -178,31 +181,6 @@ class Model_Rescorla_Wager():
             axes[i].xaxis.set_major_locator(plt.MaxNLocator(11))
             i +=1
         if save_to_file:
-            self.result.to_csv('model_results.csv')
-            plt.savefig('model_result.png')    
+            self.result.to_csv(str(self.experiment_name) + '_model_results.csv')
+            plt.savefig(str(self.experiment_name) + '_model_result.png')    
         plt.show()    
-
-
-# Define the model
-experiment = Model_Rescorla_Wager(lambda_US=1, beta_US=0.5)
-
-# Define the predictors
-A = Predictor(name='A', alpha = 0.2)
-B = Predictor(name='B',alpha = 0.2)
-C = Predictor(name='C',alpha = 0.2)
-
-# Define the experiment groups
-experiment_group = Group(name="Experiment Group")
-experiment_group.add_phase_for_group(phase_name='Conditioning', predictors=[A], outcome=True, number_of_trial=10)
-experiment_group.add_phase_for_group(phase_name='Blocking', predictors=[A,B], outcome=True, number_of_trial=10)
-experiment.add_group(experiment_group)
-
-control_group = Group(name="Control Group")
-control_group.add_phase_for_group(phase_name='Conditioning', predictors=[C], outcome=True, number_of_trial=10)
-control_group.add_phase_for_group(phase_name='Blocking', predictors=[A,B], outcome=True, number_of_trial=10)
-experiment.add_group(control_group)
-
-# Run the model
-experiment.model_run()
-experiment.display_results(save_to_file=True)
-
