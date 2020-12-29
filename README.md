@@ -8,7 +8,7 @@ There are following files
  - `model.py` is the implementation of the model
  - `experiment_blocking.py` is the blocking experiment design and parameters, it imports model.py
  - `experiment_extingtion.py` is the extinction experiment design and parameters, it imports model.py
- - `model.ipynb` is the jupiter notebook experiments. 
+ - `model.ipynb` is the jupiter notebook for experiment outputs. 
  - `<model_name>_model_result.png` , if the save_to_file parameter is set, the result graph is also save as png. 
  - `<model_name>_model_result.csv`, after the experiment run, all result data is saved if the save_to_file parameter is set. 
  
