@@ -14,7 +14,7 @@ C = Predictor(name='C',alpha = 0.2)
 # Define the experiment groups
 experiment_group = Group(name="Experiment Group")
 experiment_group.add_phase_for_group(phase_name='Conditioning', predictors=[A], outcome=True, number_of_trial=10)
-experiment_group.add_phase_for_group(phase_name='Blocking', predictors=[A], outcome=True, number_of_trial=10)
+experiment_group.add_phase_for_group(phase_name='Blocking', predictors=[A,B], outcome=True, number_of_trial=10)
 experiment.add_group(experiment_group)
 
 control_group = Group(name="Control Group")

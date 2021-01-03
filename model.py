@@ -169,8 +169,9 @@ class Model_Rescorla_Wagner():
         
         pd.set_option('display.max_rows', 100)
         #plt.autoscale(enable=False, axis='both')
+        sns.set_context(font_scale=2)   
         sns.set_style("whitegrid", {'grid.linestyle': '--'})
-        fig, axes = plt.subplots(1, len(self.result['phase'].unique()), figsize=(24, 6), sharey=True)
+        fig, axes = plt.subplots(1, len(self.result['phase'].unique()), figsize=(24, 4), sharey=True)
         fig.suptitle('Model Results',weight='bold')
         i = 0 
         plt.xticks = 1
